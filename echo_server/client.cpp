@@ -75,12 +75,21 @@ int main(int argc, char* argv[]) {
 
     char buff[256];
     int rec;
-    if ((rec = recv(socketfd, buff, 256, 0)) == SOCKET_ERROR) {
+    if ((rec = recv(socketfd, buff, sizeof(buff) -1, 0)) == SOCKET_ERROR) {
         cerr << "Error reading from socket" << endl;
         WSACleanup();
         freeaddrinfo(res);
         return 2;
     }
+    if (rec == ( 0 || SOCKET_ERROR)) {
+        cerr << "Error reading from socket" << endl;
+        WSACleanup();
+        freeaddrinfo(res);
+        return 1;
+    }
+
+    buff[rec] = '\0';
+    closesocket(socketfd);
 
     freeaddrinfo(res);
     WSACleanup();
