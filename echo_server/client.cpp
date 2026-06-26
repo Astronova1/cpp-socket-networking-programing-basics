@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
         return 2;
     }
 
-    const char*msg = "Hello from client";
+    const char* msg = "Hello from client";
     int len, bytes_sent;
     len = strlen(msg);
     if ((bytes_sent = send (socketfd, msg, len, 0)) == SOCKET_ERROR) {
@@ -72,6 +72,15 @@ int main(int argc, char* argv[]) {
         freeaddrinfo(res);
         return 2;
     };
+
+    char buff[256];
+    int rec;
+    if ((rec = recv(socketfd, buff, 256, 0)) == SOCKET_ERROR) {
+        cerr << "Error reading from socket" << endl;
+        WSACleanup();
+        freeaddrinfo(res);
+        return 2;
+    }
 
     freeaddrinfo(res);
     WSACleanup();
