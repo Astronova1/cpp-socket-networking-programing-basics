@@ -4,6 +4,7 @@
 #include <iostream>
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <cstring>
 using namespace std;
 
 int main(int argc, char* argv[]) {
@@ -41,7 +42,7 @@ int main(int argc, char* argv[]) {
 
     //creating a socket
 
-    int socketfd;
+    int socketfd = INVALID_SOCKET;
     for (p = res; p != nullptr; p = p->ai_next) {
         socketfd = socket (p->ai_family, p->ai_socktype, p->ai_protocol);
         if (socketfd == INVALID_SOCKET) {
@@ -69,6 +70,7 @@ int main(int argc, char* argv[]) {
     if ((bytes_sent = send (socketfd, msg, len, 0)) == SOCKET_ERROR) {
         cerr << "Error writing to socket" << endl;
         WSACleanup();
+        closesocket(socketfd);
         freeaddrinfo(res);
         return 2;
     };
@@ -81,7 +83,7 @@ int main(int argc, char* argv[]) {
         freeaddrinfo(res);
         return 2;
     }
-    if (rec == ( 0 || SOCKET_ERROR)) {
+    if (rec == 0) {
         cerr << "Error reading from socket" << endl;
         WSACleanup();
         freeaddrinfo(res);
