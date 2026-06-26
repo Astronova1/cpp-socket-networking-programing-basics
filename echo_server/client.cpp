@@ -34,9 +34,21 @@ int main(int argc, char* argv[]) {
     status = getaddrinfo(argv[1], argv[2], &hints, &res);
 
     if (status != 0) {
-        cout << "getaddrinfo failed " << gai_strerror(status) << endl;
+        cerr << "getaddrinfo failed " << gai_strerror(status) << endl;
         return 2;
     }
 
+    //creating a socket
 
+    int socketfd;
+
+    socketfd = socket (res->ai_family, res->ai_socktype, res->ai_protocol);
+    if (socketfd == -1) {
+        cerr << "Error creating socket" << endl;
+        return 2;
+    }
+
+    freeaddrinfo(res);
+    WSACleanup();
+    return 0;
 }
