@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
         HIBYTE(wsaData.wVersion) != 2 ) {
         cout << "LOBYTE failed" << endl;
         return 2;
-    }
+        }
 
     if (argc != 3) {
         cout << "Invalid argument provided";
@@ -53,16 +53,25 @@ int main(int argc, char* argv[]) {
             closesocket(socketfd);
             continue;
         }
-            break;
+        break;
     }
 
     if (p == nullptr) {
         cout << "Connection failed" << endl;
-        closesocket(socketfd);
         WSACleanup();
         freeaddrinfo(res);
         return 2;
     }
+
+    const char*msg = "Hello from client";
+    int len, bytes_sent;
+    len = strlen(msg);
+    if ((bytes_sent = send (socketfd, msg, len, 0)) == SOCKET_ERROR) {
+        cerr << "Error writing to socket" << endl;
+        WSACleanup();
+        freeaddrinfo(res);
+        return 2;
+    };
 
     freeaddrinfo(res);
     WSACleanup();
