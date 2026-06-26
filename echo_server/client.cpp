@@ -35,6 +35,7 @@ int main(int argc, char* argv[]) {
 
     if (status != 0) {
         cerr << "getaddrinfo failed " << gai_strerror(status) << endl;
+        WSACleanup();
         return 2;
     }
 
@@ -43,15 +44,24 @@ int main(int argc, char* argv[]) {
     int socketfd;
     for (p = res; p != nullptr; p = p->ai_next) {
         socketfd = socket (p->ai_family, p->ai_socktype, p->ai_protocol);
-        if (socketfd == -1) {
+        if (socketfd == INVALID_SOCKET) {
             cerr << "Error creating socket" << endl;
             continue;
         }
-        if (connect (socketfd,p->ai_addr, p->ai_addrlen) == -1) {       //connect to server
+        if (connect (socketfd,p->ai_addr, p->ai_addrlen) == SOCKET_ERROR) {       //connect to server
             cerr << "Error connecting to socket" << endl;
             closesocket(socketfd);
+            continue;
         }
-        break;
+            break;
+    }
+
+    if (p == nullptr) {
+        cout << "Connection failed" << endl;
+        closesocket(socketfd);
+        WSACleanup();
+        freeaddrinfo(res);
+        return 2;
     }
 
     freeaddrinfo(res);
