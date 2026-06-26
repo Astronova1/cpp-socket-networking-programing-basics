@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
     }
 
     int status;
-    struct addrinfo hints, *res;
+    struct addrinfo hints, *res, *p;
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
@@ -41,11 +41,17 @@ int main(int argc, char* argv[]) {
     //creating a socket
 
     int socketfd;
-
-    socketfd = socket (res->ai_family, res->ai_socktype, res->ai_protocol);
-    if (socketfd == -1) {
-        cerr << "Error creating socket" << endl;
-        return 2;
+    for (p = res; p != nullptr; p = p->ai_next) {
+        socketfd = socket (p->ai_family, p->ai_socktype, p->ai_protocol);
+        if (socketfd == -1) {
+            cerr << "Error creating socket" << endl;
+            continue;
+        }
+        if (connect (socketfd,p->ai_addr, p->ai_addrlen) == -1) {       //connect to server
+            cerr << "Error connecting to socket" << endl;
+            closesocket(socketfd);
+        }
+        break;
     }
 
     freeaddrinfo(res);
