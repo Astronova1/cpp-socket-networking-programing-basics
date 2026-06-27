@@ -34,21 +34,31 @@ int main (int argc, char* argv[]) {
     hints.ai_flags = AI_PASSIVE;
 
     status = getaddrinfo(nullptr, argv[1], &hints, &res );
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " [port]" << std::endl;
+        WSAGetLastError();
+        WSACleanup();
+    }
     if (status != 0) {
         std::cerr << "getaddrinfo() failed." << std::endl;
         WSAGetLastError();
         WSACleanup();
         return 1;
     }
-    int socketfd;
+    int socketfd, binded;
     for (p = res; p != nullptr; p = p->ai_next) {
         if ((socketfd = socket(p->ai_family, p->ai_socktype,p->ai_protocol)) == INVALID_SOCKET) {
             std::cerr << "socket() failed." << std::endl;
             WSAGetLastError();
             closesocket(socketfd);
-            freeaddrinfo(res);
-            exit(1);
+            continue;
+        }                                       //binding the server to port for server
+        if (bind(socketfd,p->ai_addr,p->ai_addrlen) == SOCKET_ERROR) {
+            std::cerr << "bind() failed." << std::endl << WSAGetLastError();
+            closesocket(socketfd);
+            continue;
         }
+        break;
     }
 
     WSACleanup();
