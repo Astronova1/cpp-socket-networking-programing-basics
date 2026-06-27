@@ -9,5 +9,8 @@ include_directories(echo_server)
 add_executable(cpp_socket_networking_programing_basics
         echo_server/client.cpp
         echo_server/server.cpp)
+add_executable(server
+        echo_server/server.cpp)
+
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32 -static-libgcc -static-libstdc++)
