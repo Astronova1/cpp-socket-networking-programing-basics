@@ -7,7 +7,7 @@
 #include <ws2tcpip.h>
 #include <cstdlib>
 
-# define backlog '5'
+# define BACKLOG 5
 
 int main (int argc, char* argv[]) {
 
@@ -34,12 +34,14 @@ int main (int argc, char* argv[]) {
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
 
-    status = getaddrinfo(nullptr, argv[1], &hints, &res );
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " [port]" << std::endl;
         WSAGetLastError();
         WSACleanup();
     }
+
+    status = getaddrinfo(nullptr, argv[1], &hints, &res );
+
     if (status != 0) {
         std::cerr << "getaddrinfo() failed." << std::endl;
         WSAGetLastError();
@@ -71,7 +73,7 @@ int main (int argc, char* argv[]) {
         return 2;
     }
 
-    if (listen(socketfd,backlog) != 0 ) {
+    if (listen(socketfd,BACKLOG) != 0 ) {
         std::cerr << "listen() failed." << std::endl;
         WSAGetLastError();
         freeaddrinfo(res);
@@ -86,9 +88,9 @@ int main (int argc, char* argv[]) {
     new_fd = accept(socketfd, (struct sockaddr*)&client_addr, &addr_size);
 
     int rec_client;
-    int buff[256];
+    char buff[256];
 
-    if ((rec_client = (socketfd,buff , sizeof(buff), 0)) != 0) {
+    if ((rec_client = recv(socketfd,buff , sizeof(buff) -1, 0)) != 0) {
         std::cerr << "accept() failed." << std::endl;
         WSAGetLastError();
         closesocket(new_fd);
