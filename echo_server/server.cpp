@@ -100,6 +100,8 @@ int main (int argc, char* argv[]) {
     buff[rec_client] = '\0';
     std::cout << buff << std::endl;
 
+    send(new_fd, buff, rec_client, 0);
+
     closesocket(new_fd);
     WSACleanup();
     freeaddrinfo(res);
