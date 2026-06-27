@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
 
     //creating a socket
 
-    int socketfd = INVALID_SOCKET;
+    int socketfd;
     for (p = res; p != nullptr; p = p->ai_next) {
         socketfd = socket (p->ai_family, p->ai_socktype, p->ai_protocol);
         if (socketfd == INVALID_SOCKET) {
@@ -63,7 +63,6 @@ int main(int argc, char* argv[]) {
         freeaddrinfo(res);
         return 2;
     }
-
     const char* msg = "Hello from client";
     int len, bytes_sent;
     len = strlen(msg);
