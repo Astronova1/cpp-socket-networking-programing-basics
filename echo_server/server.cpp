@@ -7,6 +7,7 @@
 #include <ws2tcpip.h>
 #include <cstdlib>
 
+# define backlog '5'
 
 int main (int argc, char* argv[]) {
 
@@ -45,14 +46,17 @@ int main (int argc, char* argv[]) {
         WSACleanup();
         return 1;
     }
-    int socketfd, binded;
+    int socketfd, binded, yes=1;
     for (p = res; p != nullptr; p = p->ai_next) {
         if ((socketfd = socket(p->ai_family, p->ai_socktype,p->ai_protocol)) == INVALID_SOCKET) {
             std::cerr << "socket() failed." << std::endl;
             WSAGetLastError();
             closesocket(socketfd);
             continue;
-        }                                       //binding the server to port for server
+        }
+        // If the port binding is already in use , allows reuse of port
+        setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&yes, sizeof(int));
+                                                        //binding the server to port for server
         if (bind(socketfd,p->ai_addr,p->ai_addrlen) == SOCKET_ERROR) {
             std::cerr << "bind() failed." << std::endl << WSAGetLastError();
             closesocket(socketfd);
@@ -60,7 +64,23 @@ int main (int argc, char* argv[]) {
         }
         break;
     }
+    if (p == nullptr) {
+        std::cerr << "connection Failed!\n" << WSAGetLastError();
+        freeaddrinfo(res);
+        closesocket(socketfd);
+        return 2;
+    }
+
+    if (listen(socketfd,backlog) != 0 ) {
+        std::cerr << "listen() failed." << std::endl;
+        WSAGetLastError();
+        freeaddrinfo(res);
+        return 2;
+    }
+
+
 
     WSACleanup();
     freeaddrinfo(res);
+    return 0;
 }
