@@ -38,6 +38,7 @@ int main (int argc, char* argv[]) {
         std::cerr << "Usage: " << argv[0] << " [port]" << std::endl;
         WSAGetLastError();
         WSACleanup();
+        return 1;
     }
 
     status = getaddrinfo(nullptr, argv[1], &hints, &res );
@@ -84,24 +85,37 @@ int main (int argc, char* argv[]) {
 
     //accepting an incoming traffic
     addr_size = sizeof client_addr;
+    std::cout << "socketfd=: " << socketfd << std::endl;
     new_fd = accept(socketfd, (struct sockaddr*)&client_addr, &addr_size);
-
+    if (new_fd == INVALID_SOCKET) {
+        std::cerr << "accept failed" << std::endl;
+        freeaddrinfo(res);
+        closesocket(socketfd);
+    }
     int rec_client;
     char buff[256];
 
-    if ((rec_client = recv(socketfd,buff , sizeof(buff) -1, 0)) != 0) {
-        std::cerr << "accept() failed." << std::endl << WSAGetLastError() << std::endl;
-        closesocket(new_fd);
+    if ((rec_client = recv(new_fd,buff , sizeof(buff) -1, 0)) <= 0) {
+        int err = WSAGetLastError();
+        std::cerr << "rec() failed." << std::endl << err << std::endl;
         freeaddrinfo(res);
+        closesocket(new_fd);
         return 2;
     }
+    std::cout << "Bytes recieved: " << rec_client << std::endl;
     buff[rec_client] = '\0';
-    std::cout << buff << std::endl;
+    std::cout << "Server recieved: " << buff << std::endl;
 
-    send(new_fd, buff, rec_client, 0);
+    int len = strlen(buff);
+    int sent = send(new_fd, buff, len, 0);
+    if (sent == SOCKET_ERROR) {
+        std::cerr << "Server send failed: " <<  WSAGetLastError() << std::endl;
+    } else {
+        printf("Server echoed %d bytes back\n", sent);
+    }
 
     closesocket(new_fd);
-    WSACleanup();
     freeaddrinfo(res);
+    WSACleanup();
     return 0;
 }
