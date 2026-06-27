@@ -85,6 +85,20 @@ int main (int argc, char* argv[]) {
     addr_size = sizeof client_addr;
     new_fd = accept(socketfd, (struct sockaddr*)&client_addr, &addr_size);
 
+    int rec_client;
+    int buff[256];
+
+    if ((rec_client = (socketfd,buff , sizeof(buff), 0)) != 0) {
+        std::cerr << "accept() failed." << std::endl;
+        WSAGetLastError();
+        closesocket(new_fd);
+        freeaddrinfo(res);
+        return 2;
+    }
+    buff[rec_client] = '\0';
+    std::cout << buff << std::endl;
+
+    closesocket(new_fd);
     WSACleanup();
     freeaddrinfo(res);
     return 0;
