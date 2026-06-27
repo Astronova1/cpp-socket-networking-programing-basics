@@ -46,7 +46,7 @@ int main (int argc, char* argv[]) {
         WSACleanup();
         return 1;
     }
-    int socketfd, binded, yes=1;
+    int socketfd, new_fd, binded, yes=1;
     for (p = res; p != nullptr; p = p->ai_next) {
         if ((socketfd = socket(p->ai_family, p->ai_socktype,p->ai_protocol)) == INVALID_SOCKET) {
             std::cerr << "socket() failed." << std::endl;
@@ -78,7 +78,12 @@ int main (int argc, char* argv[]) {
         return 2;
     }
 
+    struct sockaddr_storage client_addr;
+    socklen_t addr_size;
 
+    //accepting an incoming traffic
+    addr_size = sizeof client_addr;
+    new_fd = accept(socketfd, (struct sockaddr*)&client_addr, &addr_size);
 
     WSACleanup();
     freeaddrinfo(res);
