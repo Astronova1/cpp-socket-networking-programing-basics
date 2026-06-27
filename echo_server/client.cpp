@@ -78,21 +78,21 @@ int main(int argc, char* argv[]) {
     char buff[256];
     int rec;
     if ((rec = recv(socketfd, buff, sizeof(buff) -1, 0)) == SOCKET_ERROR) {
-        cerr << "Error reading from socket" << endl;
-        WSACleanup();
+        int err = WSAGetLastError();
+        cerr << "Error reading from socket: " << err << endl;
         freeaddrinfo(res);
-        return 2;
-    }
-    if (rec == 0) {
-        cerr << "Error reading from socket" << endl;
         WSACleanup();
+        return 2;
+    }else if (rec <= 0) {
+        int err = WSAGetLastError();
+        cerr << "Error reading from socket or server closed the connection: " << err << endl;
         freeaddrinfo(res);
         return 1;
     }
+    std::cout << "Client recieved: " << buff << std::endl;
 
-    buff[rec] = '\0';
+    buff[rec] ='\0';
     closesocket(socketfd);
-
     freeaddrinfo(res);
     WSACleanup();
     return 0;
