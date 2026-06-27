@@ -51,8 +51,7 @@ int main (int argc, char* argv[]) {
     int socketfd, new_fd, binded, yes=1;
     for (p = res; p != nullptr; p = p->ai_next) {
         if ((socketfd = socket(p->ai_family, p->ai_socktype,p->ai_protocol)) == INVALID_SOCKET) {
-            std::cerr << "socket() failed." << std::endl;
-            WSAGetLastError();
+            std::cerr << "socket() failed." << std::endl << WSAGetLastError() << std::endl;
             closesocket(socketfd);
             continue;
         }
@@ -60,25 +59,25 @@ int main (int argc, char* argv[]) {
         setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&yes, sizeof(int));
                                                         //binding the server to port for server
         if (bind(socketfd,p->ai_addr,p->ai_addrlen) == SOCKET_ERROR) {
-            std::cerr << "bind() failed." << std::endl << WSAGetLastError();
+            std::cerr << "bind() failed." << std::endl << WSAGetLastError() << std::endl;
             closesocket(socketfd);
             continue;
         }
         break;
     }
     if (p == nullptr) {
-        std::cerr << "connection Failed!\n" << WSAGetLastError();
+        std::cerr << "connection Failed!\n" << WSAGetLastError() << std::endl;
         freeaddrinfo(res);
         closesocket(socketfd);
         return 2;
     }
 
     if (listen(socketfd,BACKLOG) != 0 ) {
-        std::cerr << "listen() failed." << std::endl;
-        WSAGetLastError();
+        std::cerr << "listen() failed." << std::endl << WSAGetLastError() << std::endl;
         freeaddrinfo(res);
         return 2;
     }
+    std::cout << "Server listening on port " << argv[1] << std::endl;
 
     struct sockaddr_storage client_addr;
     socklen_t addr_size;
@@ -91,8 +90,7 @@ int main (int argc, char* argv[]) {
     char buff[256];
 
     if ((rec_client = recv(socketfd,buff , sizeof(buff) -1, 0)) != 0) {
-        std::cerr << "accept() failed." << std::endl;
-        WSAGetLastError();
+        std::cerr << "accept() failed." << std::endl << WSAGetLastError() << std::endl;
         closesocket(new_fd);
         freeaddrinfo(res);
         return 2;
