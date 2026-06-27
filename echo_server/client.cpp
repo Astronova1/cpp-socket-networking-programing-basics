@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     struct addrinfo hints, *res, *p;
 
     memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;
+    hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
     status = getaddrinfo(argv[1], argv[2], &hints, &res);
@@ -50,7 +50,8 @@ int main(int argc, char* argv[]) {
             continue;
         }
         if (connect (socketfd,p->ai_addr, p->ai_addrlen) == SOCKET_ERROR) {       //connect to server
-            cerr << "Error connecting to socket" << endl;
+            int err= WSAGetLastError();
+            cerr << "Error connecting to socket " << err << endl;
             closesocket(socketfd);
             continue;
         }
